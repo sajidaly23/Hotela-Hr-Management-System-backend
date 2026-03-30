@@ -9,31 +9,40 @@ export const errorHandler = (
 ) => {
   console.error(err);
 
+  // Zod Validation Error
   if (err instanceof ZodError) {
     return res.status(400).json({
-      error: 'Validation Error',
-      details: err.errors,
+      success: false,
+      message: 'Validation Error',
+      data: err.errors,
     });
   }
 
-  // Mongoose duplicate key error
+  // Mongoose duplicate key error (11000)
   if (err.code === 11000) {
+    const field = Object.keys(err.keyPattern || {})[0];
     return res.status(409).json({
-      error: 'Conflict Error',
-      details: 'A record with the given unique constraint already exists.',
+      success: false,
+      message: `Duplicate field value: ${field}. Please use another value!`,
+      data: null,
     });
   }
 
   // Mongoose Cast Error (Invalid ObjectId)
   if (err.name === 'CastError') {
     return res.status(400).json({
-      error: 'Invalid ID formatting',
-      details: err.message,
+      success: false,
+      message: `Invalid ${err.path}: ${err.value}`,
+      data: null,
     });
   }
 
-  res.status(500).json({
-    error: 'Internal Server Error',
-    message: err.message || 'Something went wrong',
+  // Default Error
+  const statusCode = err.statusCode || 500;
+  res.status(statusCode).json({
+    success: false,
+    message: err.message || 'Internal Server Error',
+    data: process.env.NODE_ENV === 'development' ? err.stack : null,
   });
 };
+

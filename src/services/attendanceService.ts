@@ -1,29 +1,33 @@
-import Attendance from '../models/Attendance';
+import Attendance, { IAttendance } from '../models/Attendance';
 
-export const getAllAttendance = async () => {
-  return Attendance.find().populate('employee_id');
-};
-
-export const checkIn = async (data: any) => {
-  const attendance = new Attendance({
-    employee_id: data.employee_id,
-    date: new Date(data.date),
-    check_in: data.check_in ? new Date(data.check_in) : new Date(),
-    status: data.status,
-  });
-  return attendance.save();
-};
-
-export const checkOut = async (data: any) => {
-  const attendance = await Attendance.findOne({
-    employee_id: data.employee_id,
-    date: new Date(data.date),
-  });
-
-  if (!attendance) {
-    throw new Error('Attendance record not found for today. Please check in first.');
+export const getAllAttendance = async (filters: any = {}) => {
+  const query: any = {};
+  
+  if (filters.dateFrom && filters.dateTo) {
+    query.date = { 
+      $gte: new Date(filters.dateFrom), 
+      $lte: new Date(filters.dateTo) 
+    };
+  } else if (filters.date) {
+    query.date = new Date(filters.date);
   }
 
-  attendance.check_out = new Date(data.check_out);
-  return attendance.save();
+  if (filters.employeeId && filters.employeeId !== 'all') query.employeeId = filters.employeeId;
+  if (filters.branch && filters.branch !== 'all') query.branch = filters.branch;
+  if (filters.status && filters.status !== 'all') query.status = filters.status;
+
+  return await Attendance.find(query).populate('employeeId').sort({ date: -1 });
 };
+
+export const createAttendance = async (data: Partial<IAttendance>) => {
+  return await Attendance.create(data);
+};
+
+export const updateAttendance = async (id: string, data: Partial<IAttendance>) => {
+  return await Attendance.findByIdAndUpdate(id, data, { new: true, runValidators: true });
+};
+
+export const deleteAttendance = async (id: string) => {
+  return await Attendance.findByIdAndDelete(id);
+};
+

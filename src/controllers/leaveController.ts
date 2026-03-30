@@ -3,7 +3,13 @@ import * as leaveService from '../services/leaveService';
 
 export const getAllLeaves = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const leaves = await leaveService.getAllLeaves();
+    const filters = {
+      branch: req.query.branch as string,
+      employeeId: req.query.employeeId as string,
+      status: req.query.status as string,
+    };
+    
+    const leaves = await leaveService.getAllLeaves(filters);
     res.status(200).json({
       success: true,
       message: 'Leave records retrieved',
@@ -30,6 +36,13 @@ export const createLeave = async (req: Request, res: Response, next: NextFunctio
 export const updateLeave = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const leave = await leaveService.updateLeave(req.params.id, req.body);
+    if (!leave) {
+      return res.status(404).json({
+        success: false,
+        message: 'Leave request not found',
+        data: null
+      });
+    }
     res.status(200).json({
       success: true,
       message: 'Leave request updated successfully',
@@ -42,7 +55,14 @@ export const updateLeave = async (req: Request, res: Response, next: NextFunctio
 
 export const deleteLeave = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    await leaveService.deleteLeave(req.params.id);
+    const leave = await leaveService.deleteLeave(req.params.id);
+    if (!leave) {
+      return res.status(404).json({
+        success: false,
+        message: 'Leave request not found',
+        data: null
+      });
+    }
     res.status(200).json({
       success: true,
       message: 'Leave request deleted successfully',
@@ -52,3 +72,4 @@ export const deleteLeave = async (req: Request, res: Response, next: NextFunctio
     next(error);
   }
 };
+

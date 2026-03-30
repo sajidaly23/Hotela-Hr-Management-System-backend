@@ -3,7 +3,13 @@ import * as employeeService from '../services/employeeService';
 
 export const getAllEmployees = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const employees = await employeeService.getAllEmployees();
+    const filters = {
+      branch: req.query.branch as string,
+      role: req.query.role as string,
+      status: req.query.status as string,
+    };
+    
+    const employees = await employeeService.getAllEmployees(filters);
     res.status(200).json({
       success: true,
       message: 'Employees retrieved successfully',
@@ -18,7 +24,11 @@ export const getEmployeeById = async (req: Request, res: Response, next: NextFun
   try {
     const employee = await employeeService.getEmployeeById(req.params.id);
     if (!employee) {
-      return res.status(404).json({ success: false, message: 'Employee not found', data: null });
+      return res.status(404).json({
+        success: false,
+        message: 'Employee not found',
+        data: null
+      });
     }
     res.status(200).json({
       success: true,
@@ -46,6 +56,13 @@ export const createEmployee = async (req: Request, res: Response, next: NextFunc
 export const updateEmployee = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const employee = await employeeService.updateEmployee(req.params.id, req.body);
+    if (!employee) {
+      return res.status(404).json({
+        success: false,
+        message: 'Employee not found',
+        data: null
+      });
+    }
     res.status(200).json({
       success: true,
       message: 'Employee updated successfully',
@@ -58,7 +75,14 @@ export const updateEmployee = async (req: Request, res: Response, next: NextFunc
 
 export const deleteEmployee = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    await employeeService.deleteEmployee(req.params.id);
+    const employee = await employeeService.deleteEmployee(req.params.id);
+    if (!employee) {
+      return res.status(404).json({
+        success: false,
+        message: 'Employee not found',
+        data: null
+      });
+    }
     res.status(200).json({
       success: true,
       message: 'Employee deleted successfully',
@@ -68,3 +92,4 @@ export const deleteEmployee = async (req: Request, res: Response, next: NextFunc
     next(error);
   }
 };
+

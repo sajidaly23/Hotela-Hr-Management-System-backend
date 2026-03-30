@@ -7,7 +7,8 @@ const router = Router();
 
 router.get('/', leaveController.getAllLeaves);
 router.post('/', validate(createLeaveSchema), leaveController.createLeave);
-router.put('/:id', validate(updateLeaveSchema), leaveController.updateLeave);
+router.patch('/:id', validate(updateLeaveSchema), leaveController.updateLeave);
 router.delete('/:id', leaveController.deleteLeave);
 
 export default router;
+

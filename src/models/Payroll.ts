@@ -1,25 +1,30 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IPayroll extends Document {
-  employee_id: mongoose.Types.ObjectId;
-  basic_salary: number;
+  employeeId: string;
+  employeeName: string;
+  branch: string;
+  basicSalary: number;
+  tips: number;
   bonus: number;
   deductions: number;
-  total_salary: number;
-  month: number;
-  year: number;
+  netSalary: number;
+  month: string;
 }
 
 const PayrollSchema: Schema = new Schema({
-  employee_id: { type: Schema.Types.ObjectId, ref: 'Employee', required: true },
-  basic_salary: { type: Number, required: true },
+  employeeId: { type: String, required: true },
+  employeeName: { type: String, required: true },
+  branch: { type: String, required: true },
+  basicSalary: { type: Number, required: true },
+  tips: { type: Number, default: 0 },
   bonus: { type: Number, default: 0 },
   deductions: { type: Number, default: 0 },
-  total_salary: { type: Number, required: true },
-  month: { type: Number, required: true },
-  year: { type: Number, required: true },
+  netSalary: { type: Number, required: true },
+  month: { type: String, required: true },
 });
 
-PayrollSchema.index({ employee_id: 1, month: 1, year: 1 }, { unique: true });
+PayrollSchema.index({ employeeId: 1, month: 1 }, { unique: true });
 
 export default mongoose.model<IPayroll>('Payroll', PayrollSchema);
+

@@ -8,7 +8,8 @@ const router = Router();
 router.get('/', employeeController.getAllEmployees);
 router.get('/:id', employeeController.getEmployeeById);
 router.post('/', validate(createEmployeeSchema), employeeController.createEmployee);
-router.put('/:id', validate(updateEmployeeSchema), employeeController.updateEmployee);
+router.patch('/:id', validate(updateEmployeeSchema), employeeController.updateEmployee);
 router.delete('/:id', employeeController.deleteEmployee);
 
 export default router;
+

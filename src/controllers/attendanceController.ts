@@ -3,7 +3,16 @@ import * as attendanceService from '../services/attendanceService';
 
 export const getAllAttendance = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const records = await attendanceService.getAllAttendance();
+    const filters = {
+      dateFrom: req.query.dateFrom as string,
+      dateTo: req.query.dateTo as string,
+      date: req.query.date as string,
+      employeeId: req.query.employeeId as string,
+      branch: req.query.branch as string,
+      status: req.query.status as string,
+    };
+    
+    const records = await attendanceService.getAllAttendance(filters);
     res.status(200).json({
       success: true,
       message: 'Attendance records retrieved',
@@ -14,12 +23,12 @@ export const getAllAttendance = async (req: Request, res: Response, next: NextFu
   }
 };
 
-export const checkIn = async (req: Request, res: Response, next: NextFunction) => {
+export const createAttendance = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const record = await attendanceService.checkIn(req.body);
+    const record = await attendanceService.createAttendance(req.body);
     res.status(201).json({
       success: true,
-      message: 'Checked in successfully',
+      message: 'Attendance recorded successfully',
       data: record
     });
   } catch (error) {
@@ -27,19 +36,43 @@ export const checkIn = async (req: Request, res: Response, next: NextFunction) =
   }
 };
 
-export const checkOut = async (req: Request, res: Response, next: NextFunction) => {
+export const updateAttendance = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const record = await attendanceService.checkOut(req.body);
+    const record = await attendanceService.updateAttendance(req.params.id, req.body);
+    if (!record) {
+      return res.status(404).json({
+        success: false,
+        message: 'Attendance record not found',
+        data: null
+      });
+    }
     res.status(200).json({
       success: true,
-      message: 'Checked out successfully',
+      message: 'Attendance record updated successfully',
       data: record
     });
-  } catch (error: any) {
-    if (error.message.includes('not found')) {
-      res.status(404).json({ success: false, message: 'Not Found', data: null, details: error.message });
-      return;
-    }
+  } catch (error) {
     next(error);
   }
 };
+
+export const deleteAttendance = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const record = await attendanceService.deleteAttendance(req.params.id);
+    if (!record) {
+      return res.status(404).json({
+        success: false,
+        message: 'Attendance record not found',
+        data: null
+      });
+    }
+    res.status(200).json({
+      success: true,
+      message: 'Attendance record deleted successfully',
+      data: null
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+

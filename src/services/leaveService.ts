@@ -1,26 +1,31 @@
-import Leave from '../models/Leave';
+import Leave, { ILeave } from '../models/Leave';
 
-export const getAllLeaves = async () => {
-  return Leave.find().populate('employee_id');
+export const getAllLeaves = async (filters: any = {}) => {
+  const query: any = {};
+  if (filters.branch && filters.branch !== 'all') query.branch = filters.branch;
+  if (filters.employeeId && filters.employeeId !== 'all') query.employeeId = filters.employeeId;
+  if (filters.status && filters.status !== 'all') query.status = filters.status;
+
+  return await Leave.find(query).populate('employeeId').sort({ from: -1 });
 };
 
-export const createLeave = async (data: any) => {
-  const leave = new Leave({
+export const createLeave = async (data: Partial<ILeave>) => {
+  return await Leave.create({
     ...data,
-    start_date: new Date(data.start_date),
-    end_date: new Date(data.end_date),
+    from: data.from ? new Date(data.from) : undefined,
+    to: data.to ? new Date(data.to) : undefined,
   });
-  return leave.save();
 };
 
-export const updateLeave = async (id: string, data: any) => {
+export const updateLeave = async (id: string, data: Partial<ILeave>) => {
   const updateData: any = { ...data };
-  if (data.start_date) updateData.start_date = new Date(data.start_date);
-  if (data.end_date) updateData.end_date = new Date(data.end_date);
+  if (data.from) updateData.from = new Date(data.from);
+  if (data.to) updateData.to = new Date(data.to);
 
-  return Leave.findByIdAndUpdate(id, updateData, { new: true, runValidators: true });
+  return await Leave.findByIdAndUpdate(id, updateData, { new: true, runValidators: true });
 };
 
 export const deleteLeave = async (id: string) => {
-  return Leave.findByIdAndDelete(id);
+  return await Leave.findByIdAndDelete(id);
 };
+
